@@ -370,6 +370,7 @@ dependencies = [
  "chrono",
  "dotenv",
  "log",
+ "serde",
  "tokio",
 ]
 
