@@ -28,6 +28,7 @@ pub async fn get_wallet_post(info: web::Json<WalletInfo>) -> impl Responder {
 
 pub async fn create_wallet_post(info: web::Json<WalletInfo>) -> impl Responder {
     let mnemonic: Option<String>;
+    println!("hello there1");
     match generate_mnemonic() {
         Ok(t) => mnemonic = Some(t),
         Err(_) => {
@@ -35,6 +36,7 @@ pub async fn create_wallet_post(info: web::Json<WalletInfo>) -> impl Responder {
         }
     };
 
+    println!("hello there2");
     let pair: Pair;
     match get_pair(&mnemonic.clone().unwrap(), None) {
         Ok(t) => pair = t,
@@ -43,6 +45,7 @@ pub async fn create_wallet_post(info: web::Json<WalletInfo>) -> impl Responder {
         }
     };
 
+    println!("hello there3");
     let address_to_fund: String;
     match get_pair_address_as_ss58_address(pair) {
         Ok(t) => address_to_fund = t,
@@ -51,9 +54,17 @@ pub async fn create_wallet_post(info: web::Json<WalletInfo>) -> impl Responder {
         }
     }
     // let address = Some(address_to_fund.clone());
-    let response_message = format!(
-        "address: {}",
-        address_to_fund
-    );
-    HttpResponse::Ok().body(response_message)
+    println!("hello there4");
+
+    #[derive(Serialize, Debug)]
+    pub struct WalletResponse {
+        wallet_address: String,
+    }
+
+    let response_message = WalletResponse {
+        wallet_address: address_to_fund
+    };
+
+    println!("{:?}", response_message);
+    HttpResponse::Ok().json(response_message)
 }
