@@ -1,5 +1,6 @@
 use actix_web::{web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
+use crate::controllers::accounts::{generate_mnemonic, get_pair};
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct WalletInfo {
@@ -15,6 +16,12 @@ pub async fn status() -> impl Responder {
 }
 
 pub async fn get_wallet_post(info: web::Json<WalletInfo>) -> impl Responder {
+    let mnemonic = Some(generate_mnemonic()?);
+    let pair = get_pair(&mnemonic.clone().unwrap(), None)?;
+
+    let address_to_fund = get_pair_address_as_ss58_address(pair)?;
+    let address = Some(address_to_fund.clone());
+
     let response_message = format!(
         "Got info for: feature - {}",
         info.feature_info
