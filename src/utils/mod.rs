@@ -46,29 +46,29 @@ use cess_rust_sdk::subxt::ext::sp_core::Pair as sp_core_pair;
 
 const LOG_TARGET: &str = "Utils";
 
-pub fn auth_is_valid_and_is_admin(auth_token: Option<String>) -> Result<String, StatusCode> {
-    if let Some(token) = auth_token {
-        let (is_valid, is_admin, name) = jwt::is_valid(&token)?;
-        if !is_valid || !is_admin {
-            return Err(StatusCode::UNAUTHORIZED);
-        };
-        Ok(name)
-    } else {
-        Err(StatusCode::UNAUTHORIZED)
-    }
-}
+// pub fn auth_is_valid_and_is_admin(auth_token: Option<String>) -> Result<String, StatusCode> {
+//     if let Some(token) = auth_token {
+//         let (is_valid, is_admin, name) = jwt::is_valid(&token)?;
+//         if !is_valid || !is_admin {
+//             return Err(StatusCode::UNAUTHORIZED);
+//         };
+//         Ok(name)
+//     } else {
+//         Err(StatusCode::UNAUTHORIZED)
+//     }
+// }
 
-pub fn auth_is_valid(auth_token: Option<String>) -> Result<String, StatusCode> {
-    if let Some(token) = auth_token {
-        let (is_valid, _, name) = jwt::is_valid(&token)?;
-        if !is_valid {
-            return Err(StatusCode::UNAUTHORIZED);
-        };
-        Ok(name)
-    } else {
-        Err(StatusCode::UNAUTHORIZED)
-    }
-}
+// pub fn auth_is_valid(auth_token: Option<String>) -> Result<String, StatusCode> {
+//     if let Some(token) = auth_token {
+//         let (is_valid, _, name) = jwt::is_valid(&token)?;
+//         if !is_valid {
+//             return Err(StatusCode::UNAUTHORIZED);
+//         };
+//         Ok(name)
+//     } else {
+//         Err(StatusCode::UNAUTHORIZED)
+//     }
+// }
 
 pub fn generate_code(code_len: usize) -> String {
     use rand::Rng;
@@ -118,71 +118,71 @@ pub fn init_chain(mnenomic: &str) -> ChainSdk {
     ChainSdk::new(mnenomic, "deCloud_Service")
 }
 
-pub fn find_ancestor_under_root(
-    container_hierarchy: &[ContainerHierarchy],
-    container_id: i32,
-) -> Option<(i32, String)> {
-    // container_id: (parent_id, name)
-    let parent_map: std::collections::HashMap<i32, (i32, String)> = container_hierarchy
-        .iter()
-        .flat_map(|container| {
-            let mut map = std::collections::HashMap::new();
-            map.insert(
-                container.c2_id,
-                (container.c2_parent_id, container.c2_name.clone()),
-            );
-            map
-        })
-        .collect();
+// pub fn find_ancestor_under_root(
+//     container_hierarchy: &[ContainerHierarchy],
+//     container_id: i32,
+// ) -> Option<(i32, String)> {
+//     // container_id: (parent_id, name)
+//     let parent_map: std::collections::HashMap<i32, (i32, String)> = container_hierarchy
+//         .iter()
+//         .flat_map(|container| {
+//             let mut map = std::collections::HashMap::new();
+//             map.insert(
+//                 container.c2_id,
+//                 (container.c2_parent_id, container.c2_name.clone()),
+//             );
+//             map
+//         })
+//         .collect();
 
-    let mut key_val = parent_map.get_key_value(&container_id);
-    while let Some((_, (val, _))) = key_val {
-        if parent_map.get_key_value(val).is_some() {
-            key_val = parent_map.get_key_value(val);
-        } else {
-            break;
-        }
-    }
+//     let mut key_val = parent_map.get_key_value(&container_id);
+//     while let Some((_, (val, _))) = key_val {
+//         if parent_map.get_key_value(val).is_some() {
+//             key_val = parent_map.get_key_value(val);
+//         } else {
+//             break;
+//         }
+//     }
 
-    if let Some((id, name)) = key_val {
-        return Some((*id, name.clone().1));
-    }
+//     if let Some((id, name)) = key_val {
+//         return Some((*id, name.clone().1));
+//     }
 
-    None
-}
+//     None
+// }
 
-pub fn get_container_path(
-    container_hierarchy: &[ContainerHierarchy],
-    container_id: i32,
-) -> Result<String> {
-    // container_id: (parent_id, name)
-    let parent_map: std::collections::HashMap<i32, (i32, String)> = container_hierarchy
-        .iter()
-        .flat_map(|container| {
-            let mut map = std::collections::HashMap::new();
-            map.insert(
-                container.c2_id,
-                (container.c2_parent_id, container.c2_name.clone()),
-            );
-            map
-        })
-        .collect();
+// pub fn get_container_path(
+//     container_hierarchy: &[ContainerHierarchy],
+//     container_id: i32,
+// ) -> Result<String> {
+//     // container_id: (parent_id, name)
+//     let parent_map: std::collections::HashMap<i32, (i32, String)> = container_hierarchy
+//         .iter()
+//         .flat_map(|container| {
+//             let mut map = std::collections::HashMap::new();
+//             map.insert(
+//                 container.c2_id,
+//                 (container.c2_parent_id, container.c2_name.clone()),
+//             );
+//             map
+//         })
+//         .collect();
 
-    let mut path_array: Vec<String> = vec![];
-    let mut key_val = parent_map.get_key_value(&container_id);
-    while let Some((_, (val, name))) = key_val {
-        if parent_map.get_key_value(val).is_some() {
-            path_array.push(name.clone());
-            key_val = parent_map.get_key_value(val);
-        } else {
-            path_array.push(name.clone());
-            break;
-        }
-    }
-    let path_array: Vec<String> = path_array.into_iter().rev().collect();
-    let path = path_array.join("/");
-    Ok(path)
-}
+//     let mut path_array: Vec<String> = vec![];
+//     let mut key_val = parent_map.get_key_value(&container_id);
+//     while let Some((_, (val, name))) = key_val {
+//         if parent_map.get_key_value(val).is_some() {
+//             path_array.push(name.clone());
+//             key_val = parent_map.get_key_value(val);
+//         } else {
+//             path_array.push(name.clone());
+//             break;
+//         }
+//     }
+//     let path_array: Vec<String> = path_array.into_iter().rev().collect();
+//     let path = path_array.join("/");
+//     Ok(path)
+// }
 
 pub fn get_file_title_from_path(path: &str) -> Option<String> {
     let path = Path::new(path);
@@ -431,48 +431,48 @@ pub async fn create_bucket(bucket_name: &str, signed_msg: &str, account: &str) -
     }
 }
 
-pub fn get_fid(path: &str) -> Result<FileSegmentDataInfo> {
-    dotenv().ok();
+// pub fn get_fid(path: &str) -> Result<FileSegmentDataInfo> {
+//     dotenv().ok();
 
-    let shard_path = env::var("SHARD_PATH").expect("SHARD_PATH must be set");
+//     let shard_path = env::var("SHARD_PATH").expect("SHARD_PATH must be set");
 
-    let cmd = Command::new(shard_path).arg(path).output()?;
+//     let cmd = Command::new(shard_path).arg(path).output()?;
 
-    if cmd.status.success() {
-        // Convert the output bytes to a UTF-8 string
-        let output_str = String::from_utf8_lossy(&cmd.stdout);
-        let bytes: Vec<u8> = output_str
-            .split_whitespace()
-            .filter_map(|s| s.parse::<u8>().ok())
-            .collect();
+//     if cmd.status.success() {
+//         // Convert the output bytes to a UTF-8 string
+//         let output_str = String::from_utf8_lossy(&cmd.stdout);
+//         let bytes: Vec<u8> = output_str
+//             .split_whitespace()
+//             .filter_map(|s| s.parse::<u8>().ok())
+//             .collect();
 
-        let json_str = format!("{{{}}}", String::from_utf8_lossy(&bytes));
-        let segment_data_info: FileSegmentDataInfo = serde_json::from_str(&json_str)?;
-        let segment_data_info_clone = segment_data_info.clone();
-        tokio::spawn(async move {
-            for segment_data in &segment_data_info_clone.SegmentData {
-                for fragment_hash in &segment_data.FragmentHash {
-                    if file_exists(fragment_hash) {
-                        match fs::remove_file(fragment_hash) {
-                            Ok(_) => {
-                                debug!(target: LOG_TARGET, "fragment hash deleted: {}", fragment_hash)
-                            }
-                            Err(e) => {
-                                error!(target: LOG_TARGET, "fragment hash not deleted: {}", e)
-                            }
-                        }
-                    }
-                }
-            }
-        });
+//         let json_str = format!("{{{}}}", String::from_utf8_lossy(&bytes));
+//         let segment_data_info: FileSegmentDataInfo = serde_json::from_str(&json_str)?;
+//         let segment_data_info_clone = segment_data_info.clone();
+//         tokio::spawn(async move {
+//             for segment_data in &segment_data_info_clone.SegmentData {
+//                 for fragment_hash in &segment_data.FragmentHash {
+//                     if file_exists(fragment_hash) {
+//                         match fs::remove_file(fragment_hash) {
+//                             Ok(_) => {
+//                                 debug!(target: LOG_TARGET, "fragment hash deleted: {}", fragment_hash)
+//                             }
+//                             Err(e) => {
+//                                 error!(target: LOG_TARGET, "fragment hash not deleted: {}", e)
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         });
 
-        Ok(segment_data_info)
-    } else {
-        // Print the error to the console
-        let error = String::from_utf8(cmd.stderr)?;
-        bail!("{}", error)
-    }
-}
+//         Ok(segment_data_info)
+//     } else {
+//         // Print the error to the console
+//         let error = String::from_utf8(cmd.stderr)?;
+//         bail!("{}", error)
+//     }
+// }
 
 pub async fn user_available_space(address: &str) -> Result<Option<i64>> {
     let pk_bytes = parsing_public_key(address).unwrap();

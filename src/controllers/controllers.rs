@@ -1,5 +1,8 @@
 use actix_web::{web, HttpResponse, Responder};
+use cess_rust_sdk::core::utils::account::get_pair_address_as_ss58_address;
 use serde::{Deserialize, Serialize};
+use sp_keyring::sr25519::sr25519::Pair;
+use subxt_signer::bip39::Mnemonic;
 use crate::controllers::accounts::{generate_mnemonic, get_pair};
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
@@ -16,23 +19,41 @@ pub async fn status() -> impl Responder {
 }
 
 pub async fn get_wallet_post(info: web::Json<WalletInfo>) -> impl Responder {
-    let mnemonic = Some(generate_mnemonic()?);
-    let pair = get_pair(&mnemonic.clone().unwrap(), None)?;
-
-    let address_to_fund = get_pair_address_as_ss58_address(pair)?;
-    let address = Some(address_to_fund.clone());
-
     let response_message = format!(
-        "Got info for: feature - {}",
+        "address: {}",
         info.feature_info
     );
     HttpResponse::Ok().body(response_message)
 }
 
 pub async fn create_wallet_post(info: web::Json<WalletInfo>) -> impl Responder {
+    let mnemonic: Option<String>;
+    match generate_mnemonic() {
+        Ok(t) => mnemonic = Some(t),
+        Err(_) => {
+            return HttpResponse::Ok().content_type("application/json").json("internal error on `generate_mnemonic`");
+        }
+    };
+
+    let pair: Pair;
+    match get_pair(&mnemonic.clone().unwrap(), None) {
+        Ok(t) => pair = t,
+        Err(_) => {
+            return HttpResponse::Ok().content_type("application/json").json("internal error on `get_pair`");
+        }
+    };
+
+    let address_to_fund: String;
+    match get_pair_address_as_ss58_address(pair) {
+        Ok(t) => address_to_fund = t,
+        Err(_) => {
+            return HttpResponse::Ok().content_type("application/json").json("internal error on `get_pair_address_as_ss58_address`");
+        }
+    }
+    // let address = Some(address_to_fund.clone());
     let response_message = format!(
-        "Created wallet for: feature_info - {}",
-        info.feature_info
+        "address: {}",
+        address_to_fund
     );
     HttpResponse::Ok().body(response_message)
 }

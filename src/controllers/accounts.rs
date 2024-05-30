@@ -24,22 +24,22 @@ pub fn get_pair(mnemonic: &str, password_override: Option<&str>) -> Result<Pair>
     }
 }
 
-pub fn verify_signed_msg(signed_msg: &str, msg: &[u8], account_str: &str) -> Result<bool> {
-    let account_pubkey = sp_keyring::sr25519::sr25519::Public::from_string(account_str)?;
-    let sign_bytes = match Vec::from_hex(signed_msg) {
-        Ok(sign_bytes) => sign_bytes,
-        Err(_) => bail!("Error: Failed to decode signed message"),
-    };
-    let signed_msg =
-        cess_rust_sdk::subxt::ext::sp_core::sr25519::Signature::from_slice(&sign_bytes[..]);
+// pub fn verify_signed_msg(signed_msg: &str, msg: &[u8], account_str: &str) -> Result<bool> {
+//     let account_pubkey = sp_keyring::sr25519::sr25519::Public::from_string(account_str)?;
+//     let sign_bytes = match Vec::from_hex(signed_msg) {
+//         Ok(sign_bytes) => sign_bytes,
+//         Err(_) => bail!("Error: Failed to decode signed message"),
+//     };
+//     let signed_msg =
+//         cess_rust_sdk::subxt::ext::sp_core::sr25519::Signature::from_slice(&sign_bytes[..]);
 
-    if let Some(signed_msg) = signed_msg {
-        if sr25519_verify(&signed_msg, msg, &account_pubkey) {
-            return Ok(true);
-        }
-    }
-    Ok(false)
-}
+//     if let Some(signed_msg) = signed_msg {
+//         if sr25519_verify(&signed_msg, msg, &account_pubkey) {
+//             return Ok(true);
+//         }
+//     }
+//     Ok(false)
+// }
 
 pub fn sign_message(msg: &[u8], pair: Pair) -> Result<String> {
     let signed_msg = pair.sign(msg);
@@ -47,24 +47,24 @@ pub fn sign_message(msg: &[u8], pair: Pair) -> Result<String> {
     Ok(hex_string)
 }
 
-pub fn verify_signed_polkadot_msg(
-    signed_msg: &str,
-    raw_msg: &str,
-    account_str: &str,
-) -> Result<bool> {
-    // <Bytes>msg</Bytes>
-    // In Substrate/Polkadot the <Bytes> was added to prevent someone using a Polkadot wallet as signing oracle;
-    // its a necessary security measurement.
-    let msg = format!("<Bytes>{}</Bytes>", raw_msg);
-    let msg_bytes = msg.as_bytes();
-    // verify the signed string
-    // The account auth column has the msg string,
-    // form.signed_message is signed message send by the user trying to login
-    if verify_signed_msg(signed_msg, msg_bytes, account_str)? {
-        return Ok(true);
-    }
-    Ok(false)
-}
+// pub fn verify_signed_polkadot_msg(
+//     signed_msg: &str,
+//     raw_msg: &str,
+//     account_str: &str,
+// ) -> Result<bool> {
+//     // <Bytes>msg</Bytes>
+//     // In Substrate/Polkadot the <Bytes> was added to prevent someone using a Polkadot wallet as signing oracle;
+//     // its a necessary security measurement.
+//     let msg = format!("<Bytes>{}</Bytes>", raw_msg);
+//     let msg_bytes = msg.as_bytes();
+//     // verify the signed string
+//     // The account auth column has the msg string,
+//     // form.signed_message is signed message send by the user trying to login
+//     if verify_signed_msg(signed_msg, msg_bytes, account_str)? {
+//         return Ok(true);
+//     }
+//     Ok(false)
+// }
 
 pub fn verify_signed_evm_msg(signed_msg: &str, msg: &str, account_str: &str) -> Result<bool> {
     let message = hash_message(msg.to_string());
