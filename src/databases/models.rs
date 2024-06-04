@@ -1,6 +1,7 @@
 use diesel::prelude::*;
 use crate::schema::account;
 
+#[derive(Clone, Debug)]
 #[derive(Queryable, Selectable)]
 #[diesel(table_name = crate::schema::account)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
