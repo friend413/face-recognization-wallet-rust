@@ -10,7 +10,7 @@ use crate::{
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct WalletInfo {
-    uid: u64
+    uid: i64
 }
 
 #[derive(Serialize, Debug)]
