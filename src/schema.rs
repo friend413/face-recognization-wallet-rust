@@ -2,8 +2,8 @@
 
 diesel::table! {
     account (id) {
-        id -> Integer,
-        uid -> BigUnsigned,
+        id -> Int8,
+        uid -> Int8,
         #[max_length = 256]
         mnemonic -> Nullable<Varchar>,
         #[max_length = 256]

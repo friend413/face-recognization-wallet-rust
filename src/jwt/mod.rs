@@ -8,12 +8,12 @@ use std::time::{SystemTime, UNIX_EPOCH};
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Claims {
     wallet_pubkey: String,
-    uid: u64,
+    uid: i64,
     exp: usize,
     nbf: usize,
 }
 
-pub fn generate_token(wallet_pubkey: String, uid: u64) -> Result<String, StatusCode> {
+pub fn generate_token(wallet_pubkey: String, uid: i64) -> Result<String, StatusCode> {
     dotenv().ok();
 
     let start = SystemTime::now();
@@ -45,7 +45,7 @@ pub fn generate_token(wallet_pubkey: String, uid: u64) -> Result<String, StatusC
     encode(&Header::default(), &claims, &key).map_err(|_error| StatusCode::INTERNAL_SERVER_ERROR)
 }
 
-pub fn is_valid(token: &str) -> Result<(bool, u64, String), StatusCode> {
+pub fn is_valid(token: &str) -> Result<(bool, i64, String), StatusCode> {
     let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
     let key = DecodingKey::from_secret(secret.as_bytes());
     let token_data =
