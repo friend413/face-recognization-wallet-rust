@@ -63,15 +63,10 @@ pub async fn get_wallet_post(info: web::Json<GetWalletInfo>) -> impl Responder {
     
     match generate_token(info.address.clone(), info.uid.clone()) {
         Ok(jtoken) => {
-            let connection = &mut establish_connection();
-
-            let myaccount = create_account(connection, info.uid.clone(), Some(&mnem.unwrap()), Some(&address_to_fund.clone()), Some(&jtoken.clone()));
-            
-            println!("test account: {:?}", myaccount.clone());
             let response_message = WalletResponse {
                 result: "Success".to_string(),
                 msg: "Got wallet successfully".to_string(),
-                wallet_address: info.address,
+                wallet_address: info.address.clone(),
                 token: jtoken
             };
         
