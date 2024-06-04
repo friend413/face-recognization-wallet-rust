@@ -45,7 +45,6 @@ pub fn generate_token(wallet_pubkey: String, uid: u64) -> Result<String, StatusC
     encode(&Header::default(), &claims, &key).map_err(|_error| StatusCode::INTERNAL_SERVER_ERROR)
 }
 
-// (bool, u64, string): (is_valid, uid, account_name,)
 pub fn is_valid(token: &str) -> Result<(bool, u64, String), StatusCode> {
     let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
     let key = DecodingKey::from_secret(secret.as_bytes());
