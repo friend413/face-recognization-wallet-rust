@@ -7,13 +7,13 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Claims {
-    name: String,
-    is_admin: bool,
+    wallet_pubkey: String,
+    uid: u64,
     exp: usize,
     nbf: usize,
 }
 
-pub fn generate_token(name: String, is_admin: bool) -> Result<String, StatusCode> {
+pub fn generate_token(wallet_pubkey: String, uid: u64) -> Result<String, StatusCode> {
     dotenv().ok();
 
     let start = SystemTime::now();
@@ -34,8 +34,8 @@ pub fn generate_token(name: String, is_admin: bool) -> Result<String, StatusCode
         .expect("Failed to parse JWT_NOT_BEFORE");
 
     let claims = Claims {
-        name: name.to_string(),
-        is_admin,
+        wallet_pubkey: wallet_pubkey.to_string(),
+        uid,
         exp: in_sec + exp_time, // + 1 hour
         nbf: in_sec - not_before,
     };
@@ -45,8 +45,8 @@ pub fn generate_token(name: String, is_admin: bool) -> Result<String, StatusCode
     encode(&Header::default(), &claims, &key).map_err(|_error| StatusCode::INTERNAL_SERVER_ERROR)
 }
 
-// (bool, bool, string): (is_valid, is_admin, account_name,)
-pub fn is_valid(token: &str) -> Result<(bool, bool, String), StatusCode> {
+// (bool, u64, string): (is_valid, uid, account_name,)
+pub fn is_valid(token: &str) -> Result<(bool, u64, String), StatusCode> {
     let secret = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
     let key = DecodingKey::from_secret(secret.as_bytes());
     let token_data =
@@ -56,7 +56,7 @@ pub fn is_valid(token: &str) -> Result<(bool, bool, String), StatusCode> {
                 _ => StatusCode::INTERNAL_SERVER_ERROR,
             }
         })?;
-    Ok((true, token_data.claims.is_admin, token_data.claims.name))
+    Ok((true, token_data.claims.uid, token_data.claims.wallet_pubkey))
 }
 
 #[cfg(test)]
@@ -65,11 +65,11 @@ mod test {
 
     #[test]
     fn test_is_valid() {
-        let token = generate_token("abc".to_string(), true).unwrap();
+        let token = generate_token("abc".to_string(), 1).unwrap();
 
-        let (is_valid, is_admin, name) = is_valid(&token).unwrap();
+        let (is_valid, uid, wallet_pubkey) = is_valid(&token).unwrap();
         assert_eq!(is_valid, true);
-        assert_eq!(is_admin, true);
-        assert_eq!(name, "abc".to_string());
+        assert_eq!(uid, 1);
+        assert_eq!(wallet_pubkey, "abc".to_string());
     }
 }
