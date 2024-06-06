@@ -22,7 +22,7 @@ pub fn create_account(conn: &mut PgConnection, uid: i64, mnemonic: Option<&str>,
 
     diesel::insert_into(account::table)
         .values(&new_post)
-        // .returning(account::as_returning())
+        .returning(Account::as_returning())
         .get_result(conn)
         .expect("Error saving new post")
 }

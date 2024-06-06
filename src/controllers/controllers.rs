@@ -43,6 +43,7 @@ pub async fn status() -> impl Responder {
 pub async fn get_wallet_post(info: web::Json<GetWalletInfo>) -> impl Responder {
     let connection = &mut establish_connection();
 
+    println!("heere came");
     let results = account
         .filter(uid.eq(info.clone().uid))
         .filter(address.eq(info.clone().address))
@@ -50,7 +51,7 @@ pub async fn get_wallet_post(info: web::Json<GetWalletInfo>) -> impl Responder {
         .select(Account::as_select())
         .load(connection)
         .expect("Error loading account");
-    
+    println!("heere came 2");
     if results.len() == 0 {
         let response_message = WalletResponse{
             result: "Error".to_string(),
@@ -60,7 +61,7 @@ pub async fn get_wallet_post(info: web::Json<GetWalletInfo>) -> impl Responder {
         };
         return HttpResponse::Ok().content_type("application/json").json(response_message);
     }
-    
+    println!("heere came 3");
     match generate_token(info.address.clone(), info.uid.clone()) {
         Ok(jtoken) => {
             let response_message = WalletResponse {
@@ -69,7 +70,7 @@ pub async fn get_wallet_post(info: web::Json<GetWalletInfo>) -> impl Responder {
                 wallet_address: info.address.clone(),
                 token: jtoken
             };
-        
+            println!("heere came 4");
             println!("test response_message: {:?}", response_message);
             HttpResponse::Ok().json(response_message)
         },
@@ -80,7 +81,7 @@ pub async fn get_wallet_post(info: web::Json<GetWalletInfo>) -> impl Responder {
                 wallet_address: "".to_string(),
                 token: "".to_string()
             };
-        
+            println!("heere came5");
             HttpResponse::Ok().json(response_message)
         }
     }
