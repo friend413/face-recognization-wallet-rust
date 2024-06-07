@@ -6,7 +6,6 @@ use cess_rust_sdk::config::{
     set_custom_url,
 };
 use cess_rust_sdk::core::utils::account::parsing_public_key;
-use cess_rust_sdk::core::utils::bucket::check_bucket_name;
 use cess_rust_sdk::polkadot::{
     self,
     runtime_types::{
@@ -22,53 +21,18 @@ use cess_rust_sdk::utils::{
     account_from_slice, query_storage, sign_and_submit_tx_then_watch_default,
 };
 use dotenvy::dotenv;
-// use hyper::header::HeaderValue;
-use hyper::StatusCode;
-use lettre::message::header::{ContentType, MessageId};
-use lettre::transport::smtp::authentication::Credentials;
-use lettre::{Message, SmtpTransport, Transport};
-use log::{debug, error, info};
+use log::{error, info};
 use reqwest::header::{HeaderMap, HeaderValue};
-use reqwest::{/*multipart, */Client, RequestBuilder};
-use std::fs::{metadata, File as FFile};
-use std::io::Read;
+use reqwest::Client;
 use std::path::Path;
-use std::process::Command;
 use std::{env, fs};
 use tokio::fs::File;
 
-// use crate::jwt;
-// use crate::model::FileSegmentDataInfo;
-// use crate::view_model::ContainerHierarchy;
 use cess_rust_sdk::chain::deoss::DeOss;
 use cess_rust_sdk::polkadot::runtime_types::pallet_file_bank::types::FileState;
 use cess_rust_sdk::subxt::ext::sp_core::Pair as sp_core_pair;
 
 const LOG_TARGET: &str = "Utils";
-
-// pub fn auth_is_valid_and_is_admin(auth_token: Option<String>) -> Result<String, StatusCode> {
-//     if let Some(token) = auth_token {
-//         let (is_valid, is_admin, name) = jwt::is_valid(&token)?;
-//         if !is_valid || !is_admin {
-//             return Err(StatusCode::UNAUTHORIZED);
-//         };
-//         Ok(name)
-//     } else {
-//         Err(StatusCode::UNAUTHORIZED)
-//     }
-// }
-
-// pub fn auth_is_valid(auth_token: Option<String>) -> Result<String, StatusCode> {
-//     if let Some(token) = auth_token {
-//         let (is_valid, _, name) = jwt::is_valid(&token)?;
-//         if !is_valid {
-//             return Err(StatusCode::UNAUTHORIZED);
-//         };
-//         Ok(name)
-//     } else {
-//         Err(StatusCode::UNAUTHORIZED)
-//     }
-// }
 
 pub fn generate_code(code_len: usize) -> String {
     use rand::Rng;
@@ -117,72 +81,6 @@ pub fn set_cess_custom_deoss_account() {
 pub fn init_chain(mnenomic: &str) -> ChainSdk {
     ChainSdk::new(mnenomic, "deCloud_Service")
 }
-
-// pub fn find_ancestor_under_root(
-//     container_hierarchy: &[ContainerHierarchy],
-//     container_id: i32,
-// ) -> Option<(i32, String)> {
-//     // container_id: (parent_id, name)
-//     let parent_map: std::collections::HashMap<i32, (i32, String)> = container_hierarchy
-//         .iter()
-//         .flat_map(|container| {
-//             let mut map = std::collections::HashMap::new();
-//             map.insert(
-//                 container.c2_id,
-//                 (container.c2_parent_id, container.c2_name.clone()),
-//             );
-//             map
-//         })
-//         .collect();
-
-//     let mut key_val = parent_map.get_key_value(&container_id);
-//     while let Some((_, (val, _))) = key_val {
-//         if parent_map.get_key_value(val).is_some() {
-//             key_val = parent_map.get_key_value(val);
-//         } else {
-//             break;
-//         }
-//     }
-
-//     if let Some((id, name)) = key_val {
-//         return Some((*id, name.clone().1));
-//     }
-
-//     None
-// }
-
-// pub fn get_container_path(
-//     container_hierarchy: &[ContainerHierarchy],
-//     container_id: i32,
-// ) -> Result<String> {
-//     // container_id: (parent_id, name)
-//     let parent_map: std::collections::HashMap<i32, (i32, String)> = container_hierarchy
-//         .iter()
-//         .flat_map(|container| {
-//             let mut map = std::collections::HashMap::new();
-//             map.insert(
-//                 container.c2_id,
-//                 (container.c2_parent_id, container.c2_name.clone()),
-//             );
-//             map
-//         })
-//         .collect();
-
-//     let mut path_array: Vec<String> = vec![];
-//     let mut key_val = parent_map.get_key_value(&container_id);
-//     while let Some((_, (val, name))) = key_val {
-//         if parent_map.get_key_value(val).is_some() {
-//             path_array.push(name.clone());
-//             key_val = parent_map.get_key_value(val);
-//         } else {
-//             path_array.push(name.clone());
-//             break;
-//         }
-//     }
-//     let path_array: Vec<String> = path_array.into_iter().rev().collect();
-//     let path = path_array.join("/");
-//     Ok(path)
-// }
 
 pub fn get_file_title_from_path(path: &str) -> Option<String> {
     let path = Path::new(path);

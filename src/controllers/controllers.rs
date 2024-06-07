@@ -3,14 +3,13 @@ use cess_rust_sdk::core::utils::account::get_pair_address_as_ss58_address;
 use serde::{Deserialize, Serialize};
 use sp_keyring::sr25519::sr25519::Pair;
 use diesel::prelude::*;
-use subxt_signer::bip39::Mnemonic;
 
 use crate::{
     controllers::accounts::{generate_mnemonic, get_pair},
     databases::*,
     databases::models::Account,
     schema::account::dsl::*,
-    jwt::{generate_token, is_valid}
+    jwt::generate_token
 };
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
