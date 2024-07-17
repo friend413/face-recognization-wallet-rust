@@ -88,7 +88,7 @@ pub async fn get_wallet_post(info: web::Json<GetWalletInfo>) -> impl Responder {
 
 pub async fn create_wallet_post(info: web::Json<CreateWalletInfo>) -> impl Responder {
     let mnem: Option<String>;
-
+    println!("======================  create wallet 1 ");
     match generate_mnemonic() {
         Ok(t) => mnem = Some(t),
         Err(_) => {
@@ -101,7 +101,7 @@ pub async fn create_wallet_post(info: web::Json<CreateWalletInfo>) -> impl Respo
             return HttpResponse::Ok().content_type("application/json").json(response_message);
         }
     };
-
+    println!("======================  create wallet 2 ");
     let pair: Pair;
     match get_pair(&mnem.clone().unwrap(), None) {
         Ok(t) => pair = t,
@@ -115,7 +115,7 @@ pub async fn create_wallet_post(info: web::Json<CreateWalletInfo>) -> impl Respo
             return HttpResponse::Ok().content_type("application/json").json(response_message);
         }
     };
-
+    println!("======================  create wallet 3 ");
     let address_to_fund: String;
     match get_pair_address_as_ss58_address(pair) {
         Ok(t) => address_to_fund = t,
@@ -129,7 +129,7 @@ pub async fn create_wallet_post(info: web::Json<CreateWalletInfo>) -> impl Respo
             return HttpResponse::Ok().content_type("application/json").json(response_message);
         }
     }
-
+    println!("======================  create wallet 4 ");
     match generate_token(address_to_fund.clone(), info.uid.clone()) {
         Ok(jtoken) => {
             let connection = &mut establish_connection();
