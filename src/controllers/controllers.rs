@@ -20,7 +20,8 @@ pub struct GetWalletInfo {
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct CreateWalletInfo {
-    uid: i64
+    uid: i64,
+    feature: Vec<u8>
 }
 
 #[derive(Serialize, Debug)]
@@ -28,7 +29,8 @@ pub struct WalletResponse {
     result: String,
     msg: String,
     wallet_address: String,
-    token: String
+    token: String,
+    feature: Vec<u8>
 }
 
 pub async fn index() -> impl Responder {
@@ -42,35 +44,33 @@ pub async fn status() -> impl Responder {
 pub async fn get_wallet_post(info: web::Json<GetWalletInfo>) -> impl Responder {
     let connection = &mut establish_connection();
 
-    println!("heere came");
     let results = account
-        .filter(uid.eq(info.clone().uid))
-        .filter(address.eq(info.clone().address))
+        .filter(address.eq(&info.address)) // Ensure address is referenced correctly
         .limit(1)
-        .select(Account::as_select())
-        .load(connection)
+        .load::<Account>(connection)
         .expect("Error loading account");
-    println!("heere came 2");
-    if results.len() == 0 {
-        let response_message = WalletResponse{
+
+    if results.is_empty() {
+        let response_message = WalletResponse {
             result: "Error".to_string(),
             msg: "Can not find the account".to_string(),
             wallet_address: "".to_string(),
-            token: "".to_string()
+            token: "".to_string(),
+            feature: Vec::new()
         };
         return HttpResponse::Ok().content_type("application/json").json(response_message);
     }
-    println!("heere came 3");
-    match generate_token(info.address.clone(), info.uid.clone()) {
+
+    let account_data = &results[0];
+    match generate_token(info.address.clone(), info.uid) {
         Ok(jtoken) => {
             let response_message = WalletResponse {
                 result: "Success".to_string(),
                 msg: "Got wallet successfully".to_string(),
                 wallet_address: info.address.clone(),
-                token: jtoken
+                token: jtoken,
+                feature: account_data.feature.clone().unwrap_or_else(Vec::new),
             };
-            println!("heere came 4");
-            println!("test response_message: {:?}", response_message);
             HttpResponse::Ok().json(response_message)
         },
         Err(_) => {
@@ -78,9 +78,9 @@ pub async fn get_wallet_post(info: web::Json<GetWalletInfo>) -> impl Responder {
                 result: "Error".to_string(),
                 msg: "Internal error on `generate_token`".to_string(),
                 wallet_address: "".to_string(),
-                token: "".to_string()
+                token: "".to_string(),
+                feature: Vec::new()
             };
-            println!("heere came5");
             HttpResponse::Ok().json(response_message)
         }
     }
@@ -96,7 +96,8 @@ pub async fn create_wallet_post(info: web::Json<CreateWalletInfo>) -> impl Respo
                 result: "Error".to_string(),
                 msg: "Internal error on `generate_mnemonic`".to_string(),
                 wallet_address: "".to_string(),
-                token: "".to_string()
+                token: "".to_string(),
+                feature: Vec::new()
             };
             return HttpResponse::Ok().content_type("application/json").json(response_message);
         }
@@ -110,7 +111,8 @@ pub async fn create_wallet_post(info: web::Json<CreateWalletInfo>) -> impl Respo
                 result: "Error".to_string(),
                 msg: "Internal error on `get_pair`".to_string(),
                 wallet_address: "".to_string(),
-                token: "".to_string()
+                token: "".to_string(),
+                feature: Vec::new()
             };
             return HttpResponse::Ok().content_type("application/json").json(response_message);
         }
@@ -124,7 +126,8 @@ pub async fn create_wallet_post(info: web::Json<CreateWalletInfo>) -> impl Respo
                 result: "Error".to_string(),
                 msg: "Internal error on `get_pair_address_as_ss58_address`".to_string(),
                 wallet_address: "".to_string(),
-                token: "".to_string()
+                token: "".to_string(),
+                feature: Vec::new()
             };
             return HttpResponse::Ok().content_type("application/json").json(response_message);
         }
@@ -134,14 +137,15 @@ pub async fn create_wallet_post(info: web::Json<CreateWalletInfo>) -> impl Respo
         Ok(jtoken) => {
             let connection = &mut establish_connection();
 
-            let myaccount = create_account(connection, info.uid.clone(), Some(&mnem.unwrap()), Some(&address_to_fund.clone()), Some(&jtoken.clone()));
+            let myaccount = create_account(connection, info.uid.clone(), Some(&mnem.unwrap()), Some(&address_to_fund.clone()), Some(&jtoken.clone()), Some(&info.feature));
             
             println!("test account: {:?}", myaccount.clone());
             let response_message = WalletResponse {
                 result: "Success".to_string(),
                 msg: "Created wallet successfully".to_string(),
                 wallet_address: address_to_fund,
-                token: jtoken
+                token: jtoken,
+                feature: Vec::new()
             };
         
             println!("test response_message: {:?}", response_message);
@@ -152,7 +156,8 @@ pub async fn create_wallet_post(info: web::Json<CreateWalletInfo>) -> impl Respo
                 result: "Error".to_string(),
                 msg: "Internal error on `generate_token`".to_string(),
                 wallet_address: "".to_string(),
-                token: "".to_string()
+                token: "".to_string(),
+                feature: Vec::new()
             };
         
             HttpResponse::Ok().json(response_message)

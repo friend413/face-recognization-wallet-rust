@@ -10,5 +10,6 @@ diesel::table! {
         address -> Nullable<Varchar>,
         #[max_length = 256]
         token -> Nullable<Varchar>,
+        feature -> Nullable<Bytea>,
     }
 }
