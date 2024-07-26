@@ -32,24 +32,24 @@ async fn main() -> std::io::Result<()> {
     }
     
     const MNEMONIC: &str = "chicken sport cereal awake alarm degree love trophy since broom frozen minor";
-    const ACCOUNT_ADDRESS: &str = "cXhwBytXqrZLr1qM5NHJhCzEMckSTzNKw17ci2aHft6ETSQm9";
-    const BUCKET_NAME: &str = "Face_Bucket_1";
+    const ACCOUNT_ADDRESS: &str = "cXhcFzLAS7LBuyUaPvpJd4Honkod3SFE7Fvx1HxSa3tHjHWq2";
+    const BUCKET_NAME: &str = "Face_Bucket_5";
     
-    // let sdk = ChainSdk::new(&MNEMONIC, "service_name");
-    // let deoss_url = "http://54.153.126.127:8080".to_string();
+    let sdk = ChainSdk::new(&MNEMONIC, "service_name");
+    let deoss_url = "https://deoss-us.cess.cloud".to_string();
     
-    // config::set_custom_deoss_url(Some("http://54.153.126.127:8080/".to_string()));
-    // config::set_custom_deoss_account(Some("lion".to_string()));
+    config::set_custom_deoss_url(Some("https://deoss-us.cess.cloud".to_string()));
+    config::set_custom_deoss_account(Some("cXf2xaU1RiJUhpPc471PxWknFx3mqf5opV6VTEQ4oYohWLZib".to_string()));
     
     println!(" ================ ENV VARIABLES FOR CESS ============== \n");
     println!("\t CESS_SELF: {}", cess_self_node);
     println!("\t CESS_NODE_URL: {}", cess_node_url);
-    println!("\t DEOSS_URL: {}", deoss_url);
-    println!("\t DEOSS_ACCOUNT: {}", deoss_account);
+    // println!("\t DEOSS_URL: {}", deoss_url);
+    // println!("\t DEOSS_ACCOUNT: {}", deoss_account);
     println!("\t MNEMONIC: {}", MNEMONIC);
     println!("\n");
 
-    println!(" ================ BUY CESS STORAGE SPACE ============== \n");
+    // println!(" ================ BUY CESS STORAGE SPACE ============== \n");
     
     // let buy_space_result = sdk.buy_space(1).await;
     // match buy_space_result {
@@ -90,7 +90,7 @@ async fn main() -> std::io::Result<()> {
     // println!("\n");
 
     // println!(" ================ FILE UPLOAD ============== \n");
-    // let upload_result = sdk.store_file("readme.md", BUCKET_NAME).await;
+    // let upload_result = sdk.store_file("diesel.toml", BUCKET_NAME).await;
     // match upload_result {
     //     Ok(r) => {
     //         println!("File upload successful: {:?}", r);
