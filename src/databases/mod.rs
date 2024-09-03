@@ -32,6 +32,8 @@ pub fn create_account(
         mnemonic, 
         address, 
         token,
+        seed: Some(""),
+        note: Some(""),
         feature  // Passing the binary data for the feature
     };
 
