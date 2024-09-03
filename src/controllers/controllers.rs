@@ -31,6 +31,18 @@ pub struct RecoverWalletInfo {
     recover_key: String
 }
 
+#[derive(Deserialize, Serialize, Clone, Debug)]
+pub struct StoreSeedInfo {
+    address: String,
+    seed: String,
+    note: String
+}
+
+#[derive(Deserialize, Serialize, Clone, Debug)]
+pub struct LoadSeedInfo {
+    address: String
+}
+
 #[derive(Serialize, Debug)]
 pub struct WalletResponse {
     result: String,
@@ -39,6 +51,14 @@ pub struct WalletResponse {
     mnemonic: String,
     token: String,
     feature: Vec<u8>
+}
+
+#[derive(Serialize, Debug)]
+pub struct SeedResponse {
+    result: String,
+    msg: String,
+    seed: String,
+    note: String
 }
 
 pub async fn index() -> impl Responder {
@@ -181,7 +201,6 @@ pub async fn create_wallet_post(info: web::Json<CreateWalletInfo>) -> impl Respo
     }
 }
 
-
 pub async fn recover_wallet_post(info: web::Json<RecoverWalletInfo>) -> impl Responder {
     let connection = &mut establish_connection();
 
@@ -229,3 +248,54 @@ pub async fn recover_wallet_post(info: web::Json<RecoverWalletInfo>) -> impl Res
         }
     }
 }
+
+// pub async fn store_wallet_post(info: web::Json<StoreSeedInfo>) -> impl Responder {
+//     let connection = &mut establish_connection();
+    
+//     let target = account.filter(address.eq(&info.address));
+//     let updated_account = diesel::update(target)
+//         .set((seed.eq(&info.seed), note.eq(&info.note)))
+//         .get_result::<Account>(connection)
+//         .expect("Error updating account");
+
+//     let response_message = SeedResponse {
+//         result: "Success".to_string(),
+//         msg: "Updated seed successfully".to_string(),
+//         seed: updated_account.seed.clone().unwrap_or_default(),
+//         note: updated_account.note.clone().unwrap_or_default(),
+//     };
+
+//     println!("Updated account: {:?}", updated_account);
+//     println!("Response message: {:?}", response_message);
+
+//     HttpResponse::Ok().json(response_message)
+// }
+
+// pub async fn load_wallet_post(info: web::Json<LoadSeedInfo>) -> impl Responder {
+//     let connection = &mut establish_connection();
+
+//     let results = account
+//         .filter(address.eq(&info.address)) // Ensure address is referenced correctly
+//         .limit(1)
+//         .load::<Account>(connection)
+//         .expect("Error loading account");
+
+//     if results.is_empty() {
+//         let response_message = SeedResponse {
+//             result: "Error".to_string(),
+//             msg: "Can not find the seed".to_string(),
+//             seed: "".to_string(),
+//             note: "".to_string()
+//         };
+//         return HttpResponse::Ok().content_type("application/json").json(response_message);
+//     }
+
+//     let account_data = &results[0];
+//     let response_message = SeedResponse {
+//         result: "Success".to_string(),
+//         msg: "Got seed successfully".to_string(),
+//         seed: account_data.seed.clone().expect("MUST BE STRING"),
+//         note: account_data.note.clone().expect("MUST BE STRING")
+//     };
+//     HttpResponse::Ok().json(response_message)
+// }
