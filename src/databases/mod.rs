@@ -6,8 +6,8 @@ use std::env;
 // Assuming `models` and `schema` are modules defined at the same level as this file.
 pub mod models;
 
-use crate::databases::models::{NewAccount, Account};  // Correcting the path if necessary
-use crate::schema::account;  // This might need to be corrected based on your project structure
+use crate::databases::models::{NewAccount, Account, NewSeedPhrase, SeedPhrase};  // Correcting the path if necessary
+use crate::schema::{account, seedphrase};  // This might need to be corrected based on your project structure
 
 // Function to establish a connection to the PostgreSQL database.
 pub fn establish_connection() -> PgConnection {
@@ -15,7 +15,7 @@ pub fn establish_connection() -> PgConnection {
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     PgConnection::establish(&database_url)
-        .unwrap_or_else(|_| panic!("Error connecting to {}", database_url))
+        .unwrap_or_else(|err| panic!("Error connecting to {} {}", database_url, err))
 }
 
 // Function to create a new account in the database.

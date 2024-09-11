@@ -9,5 +9,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
             .route("/get_wallet", web::post().to(get_wallet_post))
             .route("/create_wallet", web::post().to(create_wallet_post)) 
             .route("/recover_wallet", web::post().to(recover_wallet_post)) 
+            .route("/store_seed", web::post().to(store_seed_post)) 
+            .route("/load_seed", web::post().to(load_seed_post)) 
     );
 }
