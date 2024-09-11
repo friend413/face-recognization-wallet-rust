@@ -1,5 +1,6 @@
 use diesel::prelude::*;
 use crate::schema::account;
+use crate::schema::seedphrase;
 // use diesel::sql_types::Bytea; // Include Bytea type for handling binary data
 
 #[derive(Clone, Debug, Queryable, Selectable)]
@@ -11,9 +12,9 @@ pub struct Account {
     pub mnemonic: Option<String>,
     pub address: Option<String>,
     pub token: Option<String>,
+    pub feature: Option<Vec<u8>>,  // Include the feature field for binary data
     pub seed: Option<String>,
     pub note: Option<String>,
-    pub feature: Option<Vec<u8>>,  // Include the feature field for binary data
 }
 
 #[derive(Insertable)]
@@ -26,4 +27,22 @@ pub struct NewAccount<'a> {
     pub seed: Option<&'a str>,
     pub note: Option<&'a str>,
     pub feature: Option<&'a [u8]>  // Include the feature field to be able to insert binary data
+}
+
+#[derive(Clone, Debug, Queryable, Selectable)]
+#[diesel(table_name = seedphrase)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
+pub struct SeedPhrase {
+    pub seedphrase_id: i64,
+    pub seedphrase_address: Option<String>,
+    pub seedphrase_seed: Option<String>,
+    pub seedphrase_note: Option<String>,
+}
+
+#[derive(Insertable)]
+#[diesel(table_name = seedphrase)]
+pub struct NewSeedPhrase<'a> {
+    pub seedphrase_address: Option<&'a str>,
+    pub seedphrase_seed: Option<&'a str>,
+    pub seedphrase_note: Option<&'a str>,
 }

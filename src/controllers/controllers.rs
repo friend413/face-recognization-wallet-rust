@@ -7,8 +7,9 @@ use diesel::prelude::*;
 use crate::{
     controllers::accounts::{generate_mnemonic, get_pair},
     databases::*,
-    databases::models::Account,
+    databases::models::{Account, SeedPhrase, NewSeedPhrase},
     schema::account::dsl::*,
+    schema::seedphrase::dsl::*,
     jwt::generate_token
 };
 
@@ -40,7 +41,8 @@ pub struct StoreSeedInfo {
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct LoadSeedInfo {
-    address: String
+    address: String,
+    seed: String
 }
 
 #[derive(Serialize, Debug)]
@@ -252,50 +254,69 @@ pub async fn recover_wallet_post(info: web::Json<RecoverWalletInfo>) -> impl Res
 pub async fn store_seed_post(info: web::Json<StoreSeedInfo>) -> impl Responder {
     let connection = &mut establish_connection();
     
-    let target = account.filter(address.eq(&info.address));
-    let updated_account = diesel::update(target)
-        .set((seed.eq(&info.seed), note.eq(&info.note)))
-        .get_result::<Account>(connection)
-        .expect("Error updating account");
-
-    let response_message = SeedResponse {
-        result: "Success".to_string(),
-        msg: "Updated seed successfully".to_string(),
-        seed: updated_account.seed.clone().unwrap_or_default(),
-        note: updated_account.note.clone().unwrap_or_default(),
+    let new_seed_phrase = NewSeedPhrase {
+        seedphrase_address: Some(&info.address),
+        seedphrase_seed: Some(&info.seed),
+        seedphrase_note: Some(&info.note),
     };
 
-    println!("Updated account: {:?}", updated_account);
-    println!("Response message: {:?}", response_message);
+    let target = seedphrase.filter(seedphrase_address.eq(&info.address)).filter(seedphrase_seed.eq(&info.seed));
+    let result = diesel::insert_into(seedphrase)
+        .values(&new_seed_phrase)
+        .on_conflict((seedphrase_address, seedphrase_seed)) // Specify the unique constraint
+        .do_update()
+        .set(seedphrase_note.eq(&info.note))
+        .get_result::<SeedPhrase>(connection);
 
-    HttpResponse::Ok().json(response_message)
+    match result {
+        Ok(updated_seed) => {
+            let response_message = SeedResponse {
+                result: "Success".to_string(),
+                msg: "Updated/Inserted seed successfully".to_string(),
+                seed: updated_seed.seedphrase_seed.unwrap_or_default(),
+                note: updated_seed.seedphrase_note.unwrap_or_default(),
+            };
+            HttpResponse::Ok().json(response_message)
+        },
+        Err(e) => {
+            println!("Error: {:?}", e);
+            let response_message = SeedResponse {
+                result: "Error".to_string(),
+                msg: "Error updating or inserting seed".to_string(),
+                seed: "".to_string(),
+                note: "".to_string(),
+            };
+            HttpResponse::Ok().json(response_message)
+        }
+    }
 }
 
 pub async fn load_seed_post(info: web::Json<LoadSeedInfo>) -> impl Responder {
     let connection = &mut establish_connection();
 
-    let results = account
-        .filter(address.eq(&info.address)) // Ensure address is referenced correctly
+    let results = seedphrase
+        .filter(seedphrase_address.eq(&info.address)) // Ensure address is referenced correctly
+        .filter(seedphrase_seed.eq(&info.seed))
         .limit(1)
-        .load::<Account>(connection)
-        .expect("Error loading account");
+        .load::<SeedPhrase>(connection)
+        .expect("Error loading seed");
 
     if results.is_empty() {
         let response_message = SeedResponse {
             result: "Error".to_string(),
-            msg: "Can not find the seed".to_string(),
+            msg: "Can not find the given unique id and seed".to_string(),
             seed: "".to_string(),
             note: "".to_string()
         };
         return HttpResponse::Ok().content_type("application/json").json(response_message);
     }
 
-    let account_data = &results[0];
+    let seed_data = &results[0];
     let response_message = SeedResponse {
         result: "Success".to_string(),
         msg: "Got seed successfully".to_string(),
-        seed: account_data.seed.clone().expect("MUST BE STRING"),
-        note: account_data.note.clone().expect("MUST BE STRING")
+        seed: seed_data.seedphrase_seed.clone().expect("MUST BE STRING"),
+        note: seed_data.seedphrase_note.clone().expect("MUST BE STRING")
     };
     HttpResponse::Ok().json(response_message)
 }
