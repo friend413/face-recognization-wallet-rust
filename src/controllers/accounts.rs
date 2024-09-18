@@ -1,9 +1,16 @@
 use crate::utils::generate_code;
 use anyhow::{bail, Result};
-use cess_rust_sdk::subxt::ext::sp_core::Pair as sp_core_pair;
+// use cess_rust_sdk::subxt::ext::sp_core::Pair as sp_core_pair;
 
 use sp_keyring::sr25519::sr25519::Pair;
 use subxt_signer::bip39;
+use subxt::{
+    ext::sp_core::{
+        crypto::{AccountId32, Ss58AddressFormat, Ss58AddressFormatRegistry, Ss58Codec},
+        ByteArray, Pair as sp_core_pair
+    },
+    utils::AccountId32 as SubxtUtilsAccountId32,
+};
 use web3::signing::{keccak256, recover};
 
 pub fn generate_mnemonic() -> Result<String> {

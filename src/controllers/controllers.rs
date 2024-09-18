@@ -1,7 +1,14 @@
 use actix_web::{web, HttpResponse, Responder};
-use cess_rust_sdk::core::utils::account::get_pair_address_as_ss58_address;
 use serde::{Deserialize, Serialize};
 use sp_keyring::sr25519::sr25519::Pair;
+use subxt::ext::sp_runtime::traits::IdentifyAccount;
+use subxt::{
+    ext::sp_core::{
+        crypto::{AccountId32, Ss58AddressFormat, Ss58AddressFormatRegistry, Ss58Codec},
+        ByteArray, Pair as sp_core_pair
+    },
+    utils::AccountId32 as SubxtUtilsAccountId32,
+};
 use diesel::prelude::*;
 
 use crate::{
@@ -153,21 +160,39 @@ pub async fn create_wallet_post(info: web::Json<CreateWalletInfo>) -> impl Respo
         }
     };
     println!("======================  create wallet 3 ");
-    let address_to_fund: String;
-    match get_pair_address_as_ss58_address(pair) {
-        Ok(t) => address_to_fund = t,
-        Err(_) => {
-            let response_message = WalletResponse {
-                result: "Error".to_string(),
-                msg: "Internal error on `get_pair_address_as_ss58_address`".to_string(),
-                wallet_address: "".to_string(),
-                mnemonic: "".to_string(),
-                token: "".to_string(),
-                feature: Vec::new()
-            };
-            return HttpResponse::Ok().content_type("application/json").json(response_message);
-        }
-    }
+    let public_key = pair.public();
+    let address_to_fund = public_key.to_ss58check_with_version(Ss58AddressFormat::custom(42));
+    println!("{:?}", address_to_fund);
+    // match  {
+    //     Ok(t) => address_to_fund = t,
+    //     Err(_) => {
+    //         let response_message = WalletResponse {
+    //             result: "Error".to_string(),
+    //             msg: "Internal error on `get_pair_address_as_ss58_address`".to_string(),
+    //             wallet_address: "".to_string(),
+    //             mnemonic: "".to_string(),
+    //             token: "".to_string(),
+    //             feature: Vec::new()
+    //         };
+    //         return HttpResponse::Ok().content_type("application/json").json(response_message);
+    //     }
+    // }
+
+    // let address_to_fund: String;
+    // match get_pair_address_as_ss58_address(pair) {
+    //     Ok(t) => address_to_fund = t,
+    //     Err(_) => {
+    //         let response_message = WalletResponse {
+    //             result: "Error".to_string(),
+    //             msg: "Internal error on `get_pair_address_as_ss58_address`".to_string(),
+    //             wallet_address: "".to_string(),
+    //             mnemonic: "".to_string(),
+    //             token: "".to_string(),
+    //             feature: Vec::new()
+    //         };
+    //         return HttpResponse::Ok().content_type("application/json").json(response_message);
+    //     }
+    // }
     println!("======================  create wallet 4 ");
     match generate_token(address_to_fund.clone(), info.uid.clone()) {
         Ok(jtoken) => {
