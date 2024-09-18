@@ -284,50 +284,50 @@ pub async fn download_file_from_gateway(
     Ok(())
 }
 
-pub async fn send_rewards(address: &str, amount: BigDecimal) -> Result<()> {
-    let decloud_wallet = get_decloud_wallet()?;
-    let pair =
-        <sp_keyring::sr25519::sr25519::Pair as sp_core_pair>::from_string(&decloud_wallet, None)
-            .unwrap();
-    let from = PairSigner::new(pair.clone());
-    let pk_bytes = parsing_public_key(address).unwrap();
-    let dest = account_from_slice(&pk_bytes);
+// pub async fn send_rewards(address: &str, amount: BigDecimal) -> Result<()> {
+//     let decloud_wallet = get_decloud_wallet()?;
+//     let pair =
+//         <sp_keyring::sr25519::sr25519::Pair as sp_core_pair>::from_string(&decloud_wallet, None)
+//             .unwrap();
+//     let from = PairSigner::new(pair.clone());
+//     let pk_bytes = parsing_public_key(address).unwrap();
+//     let dest = account_from_slice(&pk_bytes);
 
-    let balance_transfer_tx = polkadot::tx().balances().transfer_allow_death(
-        cess_rust_sdk::subxt::utils::MultiAddress::Id(dest),
-        amount.to_u128().unwrap_or_default(),
-    );
+//     let balance_transfer_tx = polkadot::tx().balances().transfer_allow_death(
+//         cess_rust_sdk::subxt::utils::MultiAddress::Id(dest),
+//         amount.to_u128().unwrap_or_default(),
+//     );
 
-    let events = sign_and_submit_tx_then_watch_default(&balance_transfer_tx, &from).await?;
+//     let events = sign_and_submit_tx_then_watch_default(&balance_transfer_tx, &from).await?;
 
-    let transfer_event = events.find_first::<polkadot::balances::events::Transfer>()?;
-    if let Some(event) = transfer_event {
-        println!("Balance transfer success: {event:?}");
-    }
+//     let transfer_event = events.find_first::<polkadot::balances::events::Transfer>()?;
+//     if let Some(event) = transfer_event {
+//         println!("Balance transfer success: {event:?}");
+//     }
 
-    Ok(())
-}
+//     Ok(())
+// }
 
-pub async fn create_bucket(bucket_name: &str, signed_msg: &str, account: &str) -> Result<bool> {
-    let url = get_deoss_url();
-    let client = Client::new();
-    let mut headers = HeaderMap::new();
-    headers.insert("BucketName", HeaderValue::from_str(bucket_name).unwrap());
-    headers.insert("Account", HeaderValue::from_str(account).unwrap());
-    headers.insert("Message", HeaderValue::from_str(bucket_name).unwrap());
-    headers.insert("Signature", HeaderValue::from_str(signed_msg).unwrap());
+// pub async fn create_bucket(bucket_name: &str, signed_msg: &str, account: &str) -> Result<bool> {
+//     let url = get_deoss_url();
+//     let client = Client::new();
+//     let mut headers = HeaderMap::new();
+//     headers.insert("BucketName", HeaderValue::from_str(bucket_name).unwrap());
+//     headers.insert("Account", HeaderValue::from_str(account).unwrap());
+//     headers.insert("Message", HeaderValue::from_str(bucket_name).unwrap());
+//     headers.insert("Signature", HeaderValue::from_str(signed_msg).unwrap());
 
-    let request = client.put(url).headers(headers);
-    let response = request.send().await?;
-    if response.status().is_success() {
-        let body = response.text().await?; // Get the response body as String
-        info!(target: LOG_TARGET, "bucket created: DeOss response: {}", body);
-        Ok(true)
-    } else {
-        error!(target: LOG_TARGET, "Error: {}", response.status());
-        bail!("Error creating bucket. Please try again!");
-    }
-}
+//     let request = client.put(url).headers(headers);
+//     let response = request.send().await?;
+//     if response.status().is_success() {
+//         let body = response.text().await?; // Get the response body as String
+//         info!(target: LOG_TARGET, "bucket created: DeOss response: {}", body);
+//         Ok(true)
+//     } else {
+//         error!(target: LOG_TARGET, "Error: {}", response.status());
+//         bail!("Error creating bucket. Please try again!");
+//     }
+// }
 
 // pub fn get_fid(path: &str) -> Result<FileSegmentDataInfo> {
 //     dotenv().ok();

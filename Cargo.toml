@@ -25,7 +25,8 @@ reqwest = "0.12.4"
 serde = { version = "1.0.203", features = ["derive"]}
 serde_json = "1.0.117"
 sp-io = "24.0.0"
-sp-keyring = "24.0.0"
+sp-keyring = "34.0.0"
+subxt = { git = "https://github.com/paritytech/subxt", tag="v0.37.0", features=["substrate-compat", "unstable-reconnecting-rpc-client"]}
 subxt-signer = "0.37.0"
 tokio = { version = "1", features = ["full"] }
 web3 = "0.19.0"
